@@ -96,6 +96,5 @@ if __name__ == '__main__':
             inpt = input('Insert node to be infected ("stop" to start simulation): ')
 
     # simulation of infection
-
     for nd in nodeList:
         print(str(nd))
