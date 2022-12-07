@@ -1,7 +1,11 @@
+import random
+
+
 class Node:
-    def __init__(self, id, status):
+    def __init__(self, id, status, vulnerability):
         self.id = id
         self.status = status
+        self.vulnerability = vulnerability
 
     def __str__(self):
         return 'Nodo: ' + str(self.id) + ', Stato: ' + str(self.status)
@@ -15,45 +19,7 @@ class Msg:
         self.eta = eta
 
     def __str__(self):
-        return 'Mittente: ' + str(self.src) + ', Destinatario: ' + str(self.dst) + ', Eta: ' + str(self.eta)
-
-
-def messagelist(file):
-    # support variables
-    l = []
-    source = 0
-    destination = 0
-    times = 0
-    j = 1
-
-    # populate messages list
-    for line in f:
-        i = 1
-        for w in line.split():
-            if i % 3 == 0:
-                times = w
-            elif i % 2 == 0:
-                destination = w
-            else:
-                source = w
-            i = i + 1
-        l.insert(j, Msg(j, int(source), int(destination), int(times)))
-        j = j + 1
-
-    return l
-
-
-def nodelist(messages):
-    # support variables
-    m = []
-
-    for sms in messages:
-        if sum(nodo.id == sms.src for nodo in m) == 0:
-            m.insert(int(sms.src), Node(int(sms.src), 0))
-        if sum(nodo.id == sms.dst for nodo in m) == 0:
-            m.insert(int(sms.dst), Node(int(sms.dst), 0))
-
-    return m
+        return 'Mittente: ' + str(self.src.id) + ', Destinatario: ' + str(self.dst.id) + ', Eta: ' + str(self.eta)
 
 
 if __name__ == '__main__':
@@ -61,20 +27,43 @@ if __name__ == '__main__':
 
     # dataset import
     print('Opening file :', filename)
-    f = open(filename, 'r')
+    try:
+        f = open(filename, 'r')
+    except:
+        print('File non esistente')
+        quit()
 
     # populating lists
-    msgList = messagelist(f)
-    nodeList = nodelist(msgList)
+    nodeList = []
+    msgList = []
+    j = 1
+    for line in f:
+        i = 1
+        for w in line.split():
+            if i == 3:
+                times = w
+            elif i == 2:
+                destination = w
+                nodoD = Node(int(destination), 0, 0.5)
+                if sum(nodo.id == int(destination) for nodo in nodeList) == 0:
+                    nodeList.append(nodoD)
+            elif i == 1:
+                source = w
+                nodoS = Node(int(source), 0, 0.5)
+                if sum(nodo.id == int(source) for nodo in nodeList) == 0:
+                    nodeList.append(nodoS)
+            i = i + 1
+
+        msgList.append(Msg(j, nodoS, nodoD, int(times)))
+        j = j + 1
 
     # close file
     f.close()
-
     # sort messages list based on eta
-    msgList.sort(key=lambda x: int(x.eta))
+    msgList.sort(key=lambda x: x.eta)
 
     # sort node list based on node id
-    nodeList.sort(key=lambda x: int(x.id))
+    nodeList.sort(key=lambda x: x.id)
 
     # input infected nodes
     inpt = input('Insert node to be infected ("stop" to start simulation): ')
@@ -83,11 +72,18 @@ if __name__ == '__main__':
             try:
                 intero = int(inpt)
                 for elem in nodeList:
-                    if elem.id == intero:
+                    if int(elem.id) == intero:
                         found = True
                         elem.status = -1
+
                 if found:
                     print('Infected node: ', intero)
+                    for elem in msgList:
+                        if int(elem.src.id) == intero:
+                            elem.src.status = -1
+                        if int(elem.dst.id) == intero:
+                            elem.dst.status = -1
+
                 else:
                     print('Node: ', intero, ' does not exist')
             except:
@@ -96,5 +92,62 @@ if __name__ == '__main__':
             inpt = input('Insert node to be infected ("stop" to start simulation): ')
 
     # simulation of infection
-    for nd in nodeList:
-        print(str(nd))
+    print('simulating....this could take a while')
+    stdEngagement = 1
+    stdTrust = 0.4
+
+    for msg in msgList:
+        indxM = msgList.index(msg)
+
+        for node in nodeList:
+            if msg.src.id == node.id:
+                indxS = nodeList.index(node)
+            if msg.dst.id == node.id:
+                indxD = nodeList.index(node)
+
+        if nodeList[indxS].status == -1 and nodeList[indxD].status == 0:
+            pspread = stdEngagement*stdTrust*nodeList[indxD].vulnerability
+
+            if random.uniform(0,1) < pspread:
+                nodeList[indxD].status = -1
+                msgList[indxM].dst.status = -1
+            elif random.uniform(0,1) < 0.2:
+                nodeList[indxD].status = 1
+                msgList[indxM].dst.status = 1
+
+        elif nodeList[indxS].status == 1 and nodeList[indxD].status != 1:
+            pspread = stdEngagement/3 * stdTrust * nodeList[indxD].vulnerability
+
+            if random.uniform(0,1) < pspread:
+                nodeList[indxD].status = 1
+                msgList[indxM].dst.status = 1
+
+    # Deploy results
+    nInfected = 0
+    nRecovered = 0
+    nSusceptible = 0
+    nNodes = 0
+    for node in nodeList:
+        nNodes += 1
+        if node.status == 0:
+            nSusceptible += 1
+        elif node.status == -1:
+            nInfected += 1
+        else:
+            nRecovered += 1
+
+    print('Simulation ended with: ', nNodes, ' nodes')
+    print('Infected: ', nInfected)
+    print('Susceptible: ', nSusceptible)
+    print('Recovered: ', nRecovered)
+
+
+
+
+
+
+
+
+
+
+
