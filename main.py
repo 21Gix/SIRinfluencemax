@@ -76,23 +76,26 @@ if __name__ == '__main__':
     # sort node list based on node id
     nodeList.sort(key=lambda x: int(x.id))
 
-    for msg in msgList:
-        print(str(msg))
-
-    for us in nodeList:
-        print(str(us))
-
     # input infected nodes
     inpt = input('Insert node to be infected ("stop" to start simulation): ')
     while inpt != 'stop' and inpt != 'STOP':
-        try:
-            intero = int(inpt)
-            if sum(nodo.id == intero for nodo in nodeList) > 0:
-                nodeList[intero].status = -1
-                print('Infettato nodo: ', intero)
-            else:
-                print('Nodo non esistente nella rete')
-        except:
-            print('Insert integer number')
+            found = False
+            try:
+                intero = int(inpt)
+                for elem in nodeList:
+                    if elem.id == intero:
+                        found = True
+                        elem.status = -1
+                if found:
+                    print('Infected node: ', intero)
+                else:
+                    print('Node: ', intero, ' does not exist')
+            except:
+                print('Insert integer number')
 
-        inpt = input('Insert node to be infected ("stop" to start simulation): ')
+            inpt = input('Insert node to be infected ("stop" to start simulation): ')
+
+    # simulation of infection
+
+    for nd in nodeList:
+        print(str(nd))
