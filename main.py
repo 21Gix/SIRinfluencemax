@@ -15,7 +15,45 @@ class Msg:
         self.eta = eta
 
     def __str__(self):
-        return 'Mittente: ' + self.src + ', Destinatario: ' + self.dst + ', Eta: ' + self.eta
+        return 'Mittente: ' + str(self.src) + ', Destinatario: ' + str(self.dst) + ', Eta: ' + str(self.eta)
+
+
+def messagelist(file):
+    # support variables
+    l = []
+    source = 0
+    destination = 0
+    times = 0
+    j = 1
+
+    # populate messages list
+    for line in f:
+        i = 1
+        for w in line.split():
+            if i % 3 == 0:
+                times = w
+            elif i % 2 == 0:
+                destination = w
+            else:
+                source = w
+            i = i + 1
+        l.insert(j, Msg(j, int(source), int(destination), int(times)))
+        j = j + 1
+
+    return l
+
+
+def nodelist(messages):
+    # support variables
+    m = []
+
+    for sms in messages:
+        if sum(nodo.id == sms.src for nodo in m) == 0:
+            m.insert(int(sms.src), Node(int(sms.src), 0))
+        if sum(nodo.id == sms.dst for nodo in m) == 0:
+            m.insert(int(sms.dst), Node(int(sms.dst), 0))
+
+    return m
 
 
 if __name__ == '__main__':
@@ -25,37 +63,18 @@ if __name__ == '__main__':
     print('Opening file :', filename)
     f = open(filename, 'r')
 
-    # preparing lists
-    msgList = []
-    nodeList = []
+    # populating lists
+    msgList = messagelist(f)
+    nodeList = nodelist(msgList)
 
-    # support variables
-    ident = 0
-    source = 0
-    destination = 0
-    times = 0
-    j = 1
-
-    # populate messages list
-    for x in f:
-        i = 1
-        for w in x.split():
-            if i % 3 == 0:
-                times = w
-            elif i % 2 == 0:
-                destination = w
-                if sum(nodo.id == w for nodo in nodeList) == 0:
-                    nodeList.append(Node(w, 0))
-            else:
-                source = w
-                if sum(nodo.id == w for nodo in nodeList) == 0:
-                    nodeList.append(Node(w, 0))
-            i = i + 1
-        msgList.append(Msg(j, source, destination, times))
-        j = j + 1
+    # close file
+    f.close()
 
     # sort messages list based on eta
-    msgList.sort(key=lambda x: x.eta, reverse=False)
+    msgList.sort(key=lambda x: int(x.eta))
+
+    # sort node list based on node id
+    nodeList.sort(key=lambda x: int(x.id))
 
     for msg in msgList:
         print(str(msg))
@@ -63,3 +82,17 @@ if __name__ == '__main__':
     for us in nodeList:
         print(str(us))
 
+    # input infected nodes
+    inpt = input('Insert node to be infected ("stop" to start simulation): ')
+    while inpt != 'stop' and inpt != 'STOP':
+        try:
+            intero = int(inpt)
+            if sum(nodo.id == intero for nodo in nodeList) > 0:
+                nodeList[intero].status = -1
+                print('Infettato nodo: ', intero)
+            else:
+                print('Nodo non esistente nella rete')
+        except:
+            print('Insert integer number')
+
+        inpt = input('Insert node to be infected ("stop" to start simulation): ')
