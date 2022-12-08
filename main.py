@@ -94,7 +94,7 @@ if __name__ == '__main__':
     # simulation of infection
     print('simulating....this could take a while')
     stdEngagement = 1
-    stdTrust = 0.4
+    stdTrust = 0.5
 
     for msg in msgList:
         indxM = msgList.index(msg)
@@ -111,20 +111,9 @@ if __name__ == '__main__':
             if random.uniform(0,1) < pspread:
                 nodeList[indxD].status = -1
                 msgList[indxM].dst.status = -1
-            elif random.uniform(0,1) < 0.2:
-                nodeList[indxD].status = 1
-                msgList[indxM].dst.status = 1
-
-        elif nodeList[indxS].status == 1 and nodeList[indxD].status != 1:
-            pspread = stdEngagement/3 * stdTrust * nodeList[indxD].vulnerability
-
-            if random.uniform(0,1) < pspread:
-                nodeList[indxD].status = 1
-                msgList[indxM].dst.status = 1
 
     # Deploy results
     nInfected = 0
-    nRecovered = 0
     nSusceptible = 0
     nNodes = 0
     for node in nodeList:
@@ -133,13 +122,11 @@ if __name__ == '__main__':
             nSusceptible += 1
         elif node.status == -1:
             nInfected += 1
-        else:
-            nRecovered += 1
 
     print('Simulation ended with: ', nNodes, ' nodes')
     print('Infected: ', nInfected)
     print('Susceptible: ', nSusceptible)
-    print('Recovered: ', nRecovered)
+
 
 
 
