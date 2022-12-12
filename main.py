@@ -95,6 +95,7 @@ if __name__ == '__main__':
     print('simulating....this could take a while')
     stdEngagement = 1
     stdTrust = 0.4
+    pRecover = 0
 
     for msg in msgList:
         indxM = msgList.index(msg)
@@ -111,7 +112,7 @@ if __name__ == '__main__':
             if random.uniform(0,1) < pspread:
                 nodeList[indxD].status = -1
                 msgList[indxM].dst.status = -1
-            elif random.uniform(0,1) < 0.2:
+            elif random.uniform(0,1) < pRecover:
                 nodeList[indxD].status = 1
                 msgList[indxM].dst.status = 1
 
