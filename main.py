@@ -1,14 +1,16 @@
 import random
+from tqdm import tqdm
 
 
 class Node:
-    def __init__(self, id, status, vulnerability):
+    def __init__(self, id, status, vulnerability, outdegree):
         self.id = id
         self.status = status
         self.vulnerability = vulnerability
+        self.outdegree = outdegree
 
     def __str__(self):
-        return 'Nodo: ' + str(self.id) + ', Stato: ' + str(self.status)
+        return 'Nodo: ' + str(self.id) + ', Stato: ' + str(self.status) + ', Degree: ' + str(self.outdegree)
 
 
 class Msg:
@@ -37,19 +39,21 @@ if __name__ == '__main__':
     nodeList = []
     msgList = []
     j = 1
-    for line in f:
+    for line in tqdm(f):
         i = 1
         for w in line.split():
             if i == 3:
+                if j == 1:
+                    curtime = int(w)
                 times = w
             elif i == 2:
                 destination = w
-                nodoD = Node(int(destination), 0, 0.5)
+                nodoD = Node(int(destination), 0, 0.5, 0)
                 if sum(nodo.id == int(destination) for nodo in nodeList) == 0:
                     nodeList.append(nodoD)
             elif i == 1:
                 source = w
-                nodoS = Node(int(source), 0, 0.5)
+                nodoS = Node(int(source), 0, 0.5, 0)
                 if sum(nodo.id == int(source) for nodo in nodeList) == 0:
                     nodeList.append(nodoS)
             i = i + 1
@@ -57,6 +61,8 @@ if __name__ == '__main__':
         msgList.append(Msg(j, nodoS, nodoD, int(times)))
         j = j + 1
 
+
+    print('Done')
     # close file
     f.close()
     # sort messages list based on eta
@@ -64,6 +70,22 @@ if __name__ == '__main__':
 
     # sort node list based on node id
     nodeList.sort(key=lambda x: x.id)
+
+    for l in msgList:
+        if l.eta == curtime:
+            indxM = msgList.index(l)
+
+            for node in nodeList:
+                if node.id == l.src.id:
+                    indxS = nodeList.index(node)
+                    nodeList[indxS].outdegree += 1
+
+
+
+    # debug print
+    print(curtime)
+    for node in nodeList:
+        print(str(node))
 
     # input infected nodes
     inpt = input('Insert node to be infected ("stop" to start simulation): ')
