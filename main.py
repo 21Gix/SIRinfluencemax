@@ -80,13 +80,6 @@ if __name__ == '__main__':
                     indxS = nodeList.index(node)
                     nodeList[indxS].outdegree += 1
 
-
-
-    # debug print
-    print(curtime)
-    for node in nodeList:
-        print(str(node))
-
     # input infected nodes
     inpt = input('Insert node to be infected ("stop" to start simulation): ')
     while inpt != 'stop' and inpt != 'STOP':
@@ -119,7 +112,7 @@ if __name__ == '__main__':
     stdTrust = 0.4
     pRecover = 0
 
-    for msg in msgList:
+    for msg in tqdm(msgList):
         indxM = msgList.index(msg)
 
         for node in nodeList:
